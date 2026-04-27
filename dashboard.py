@@ -126,9 +126,9 @@ with st.sidebar:
 # ══════════════════════════════════════════════════
 # 탭
 # ══════════════════════════════════════════════════
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 Overview", "🔥 Fear Analysis", "🔬 Causal Inference",
-    "📡 Channel Explorer", "🎨 Multimodal"
+    "📡 Channel Explorer", "🎨 Multimodal", "💡 전략 가이드"
 ])
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -629,6 +629,76 @@ with tab5:
                 fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                                    font_color="white", coloraxis_showscale=False)
                 st.plotly_chart(fig2, use_container_width=True)
+
+            # ── 채널 유형 × 공포 교차 분석 (심화)
+            st.markdown("---")
+            st.markdown("### 📊 채널 유형 × 공포 키워드 — 댓글 반응 교차 분석")
+
+            vid_key = "Video_ID" if "Video_ID" in com2.columns else None
+            if vid_key and "Video_ID" in df.columns:
+                com_m = com2.merge(df[["Video_ID","Type"]].drop_duplicates(), on="Video_ID", how="left")
+            else:
+                com_m = com2.copy()
+                com_m["Type"] = com_m.get("Type", "Unknown")
+
+            com_m = com_m[com_m["Type"].isin(["General","Medical Pro"])]
+
+            if len(com_m) > 0:
+                cross = com_m.groupby(["Type","Has_Fear"])[["pos","neg","fear_reaction"]].mean() * 100
+                cross = cross.reset_index()
+                cross["그룹"] = cross["Type"] + " · " + cross["Has_Fear"].map({0:"공포 없음", 1:"공포 포함"})
+
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    fig3 = go.Figure()
+                    colors_grp = {
+                        "General · 공포 없음":   "#4a90d9",
+                        "General · 공포 포함":   "#1a5fa8",
+                        "Medical Pro · 공포 없음": "#7ed56f",
+                        "Medical Pro · 공포 포함": "#c0392b",
+                    }
+                    for _, row in cross.iterrows():
+                        grp_name = row["그룹"]
+                        fig3.add_trace(go.Bar(
+                            name=grp_name,
+                            x=["긍정 (%)", "부정 (%)", "공포 반응 (%)"],
+                            y=[row["pos"], row["neg"], row["fear_reaction"]],
+                            marker_color=colors_grp.get(grp_name, C["gray"])
+                        ))
+                    fig3.update_layout(
+                        barmode="group",
+                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                        font_color="white", yaxis_title="비율 (%)",
+                        title="채널 유형 × 공포 키워드별 댓글 감성",
+                        legend=dict(orientation="h", yanchor="bottom", y=-0.5)
+                    )
+                    st.plotly_chart(fig3, use_container_width=True)
+
+                with col_b:
+                    st.markdown("#### 통계 검정 — 공포 반응률 차이")
+                    for ch_type in ["General", "Medical Pro"]:
+                        sub = com_m[com_m["Type"] == ch_type]
+                        f_  = sub[sub["Has_Fear"]==1]["fear_reaction"]
+                        nf_ = sub[sub["Has_Fear"]==0]["fear_reaction"]
+                        if len(f_) >= 5 and len(nf_) >= 5:
+                            _, pv = stats.mannwhitneyu(f_, nf_, alternative="two-sided")
+                            fr_ = f_.mean() * 100
+                            nfr_ = nf_.mean() * 100
+                            sig = "✅ 유의" if pv < 0.05 else "❌ 비유의"
+                            box_cls = "insight-box" if pv < 0.05 else "info-box"
+                            st.markdown(f"""<div class="{box_cls}">
+                            <b>{ch_type}</b><br>
+                            공포 포함 공포반응: <b>{fr_:.1f}%</b><br>
+                            공포 미포함 공포반응: <b>{nfr_:.1f}%</b><br>
+                            p={pv:.4f} → {sig}
+                            </div>""", unsafe_allow_html=True)
+
+                    st.markdown("""<div class="warn-box">
+                    <b>해석 포인트</b><br>
+                    공포 키워드 영상에 실제 공포 반응 댓글이 더 많은가?<br>
+                    채널 유형에 따라 반응 패턴이 다른가?<br>
+                    → 제목의 공포 소구가 시청자 감정에 미치는 실제 영향 검증
+                    </div>""", unsafe_allow_html=True)
         else:
             st.warning("comments.csv 없음")
 
@@ -690,6 +760,164 @@ with tab5:
                     st.markdown(f"**Cluster {cl}**: {v/1e4:.1f}만회")
         else:
             st.info("임베딩 파일(title_embeddings.npy) 없음 — kobert_analysis.py 먼저 실행")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TAB 6: STRATEGY GUIDE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with tab6:
+    st.markdown("## 💡 전략 가이드 — So What?")
+    st.markdown("*분석 결과를 실제 채널 운영 전략으로 변환합니다.*")
+
+    # ── 핵심 결론 3-box
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("""<div class="warn-box">
+        <h4 style="color:#e94560;margin-top:0">❌ 검증된 착시</h4>
+        단순 비교 <b>+2.1배</b> 효과는<br>채널 규모 교란변수의 산물<br><br>
+        대형 채널이 공포 키워드를 자주 사용하고,<br>대형 채널은 원래 조회수가 높음
+        </div>""", unsafe_allow_html=True)
+    with c2:
+        st.markdown("""<div class="warn-box">
+        <h4 style="color:#e94560;margin-top:0">⚠️ 실제 효과 (PSM)</h4>
+        채널 규모 통제 시<br><b>오히려 0.63배 감소</b> (p=0.019)<br><br>
+        Bootstrap CI: [0.44, 0.85]<br>
+        공포 키워드 = 조회수 감소 요인
+        </div>""", unsafe_allow_html=True)
+    with c3:
+        st.markdown("""<div class="insight-box">
+        <h4 style="color:#27ae60;margin-top:0">✅ 채널 유형이 핵심</h4>
+        <b>Medical Pro</b>: 0.83배 감소 (유의)<br>
+        <b>General</b>: 1.14배 비유의<br><br>
+        전문성 채널일수록 공포 소구가<br>신뢰도를 깎아먹음
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── 채널 유형별 권장 전략
+    st.markdown("### 채널 유형별 제목 전략 권장사항")
+    col_l, col_r = st.columns(2)
+    with col_l:
+        st.markdown("""<div class="warn-box">
+        <h4 style="margin-top:0">🏥 의료 전문 채널 (Medical Pro)</h4>
+        <b>공포 키워드 사용 자제</b> 강력 권장<br><br>
+        ✅ <b>추천 패턴</b><br>
+        &nbsp;&nbsp;• "고혈압 관리 3가지 핵심 전략"<br>
+        &nbsp;&nbsp;• "당뇨 환자가 꼭 알아야 할 식단"<br>
+        &nbsp;&nbsp;• "암 검진 주기와 검사 종류 총정리"<br><br>
+        ❌ <b>피할 패턴</b><br>
+        &nbsp;&nbsp;• "고혈압 방치하면 사망합니다"<br>
+        &nbsp;&nbsp;• "암 증상 무시하면 절대 안 되는 이유"<br><br>
+        시청자는 전문가에게 <b>정보·신뢰</b>를 기대<br>공포 자극은 권위 손상으로 이어짐
+        </div>""", unsafe_allow_html=True)
+    with col_r:
+        st.markdown("""<div class="info-box">
+        <h4 style="margin-top:0">📱 일반 채널 (General)</h4>
+        <b>공포 키워드 효과 없음</b> — 중립적<br><br>
+        📌 <b>더 중요한 것들</b><br>
+        &nbsp;&nbsp;• <b>채널 규모</b>가 조회수를 결정 (구독자 증가 우선)<br>
+        &nbsp;&nbsp;• <b>콘텐츠 발행 빈도</b>와 품질<br>
+        &nbsp;&nbsp;• <b>썸네일 품질</b>: 빨간 배경·대비·엣지 밀도가 유의미<br>
+        &nbsp;&nbsp;• <b>제목 길이</b>: 15~25자 범위 최적<br><br>
+        📊 <b>카테고리 선택 전략</b><br>
+        조회수 중앙값이 높은 카테고리(암·심장)에서<br>시작해 채널 성장 기반 확보
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── 조회수 결정 요인 순위
+    st.markdown("### 조회수를 실제로 결정하는 요인 (영향력 순위)")
+    factors = [
+        ("채널 구독자 수", 85, "채널 규모가 압도적 1위"),
+        ("영상 발행 연도/나이", 60, "오래된 영상이 누적 조회수 많음 (착시 원인)"),
+        ("썸네일 시각 피처", 35, "빨간색·대비·엣지 밀도 모두 유의 (p<0.05)"),
+        ("질환 카테고리", 30, "암·심장 카테고리가 구조적으로 높음"),
+        ("Shorts 여부", 20, "별도 알고리즘 — 일반 영상과 분리 분석 필요"),
+        ("공포 키워드 (PSM)", -15, "채널 규모 통제 시 오히려 감소 (역효과)"),
+    ]
+    f_df = pd.DataFrame(factors, columns=["요인","영향력 점수","설명"])
+    fig_f = go.Figure(go.Bar(
+        x=f_df["영향력 점수"],
+        y=f_df["요인"],
+        orientation="h",
+        marker_color=[C["red"] if v < 0 else C["blue"] for v in f_df["영향력 점수"]],
+        text=f_df["설명"],
+        textposition="outside",
+    ))
+    fig_f.add_vline(x=0, line_dash="dash", line_color="white")
+    fig_f.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font_color="white", xaxis_title="상대적 영향력 (정성 추정)",
+        margin=dict(l=160, r=20), height=350
+    )
+    st.plotly_chart(fig_f, use_container_width=True)
+
+    st.markdown("---")
+
+    # ── 제목 분석기
+    st.markdown("### 🔍 제목 분석기")
+    st.markdown("제목을 입력하면 공포 점수와 채널 유형별 권장사항을 알려드립니다.")
+
+    col_inp, col_type = st.columns([3, 1])
+    with col_inp:
+        title_input = st.text_input("제목 입력", placeholder="예: 당뇨 방치하면 실명·투석·사망까지 갑니다")
+    with col_type:
+        my_type = st.selectbox("내 채널 유형", ["Medical Pro", "General"])
+
+    if title_input:
+        found = [w for w in FEAR_WORDS if w in title_input]
+        score = len(found)
+
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("공포 점수", f"{score}점 / {len(FEAR_WORDS)}점")
+        col_b.metric("감지 키워드", f"{len(found)}개")
+        with col_c:
+            if score == 0:
+                st.markdown("""<div class="insight-box" style="padding:10px">
+                ✅ <b>공포 키워드 없음</b><br>모든 채널 유형에 적합</div>""", unsafe_allow_html=True)
+            elif score <= 1:
+                st.markdown("""<div class="info-box" style="padding:10px">
+                ⚠️ <b>낮은 공포 강도</b><br>Medical Pro는 주의 권장</div>""", unsafe_allow_html=True)
+            else:
+                st.markdown("""<div class="warn-box" style="padding:10px">
+                ❌ <b>높은 공포 강도</b><br>Medical Pro 채널 위험</div>""", unsafe_allow_html=True)
+
+        if found:
+            st.markdown(f"**감지된 공포 키워드**: {', '.join([f'`{w}`' for w in found])}")
+
+        if my_type == "Medical Pro" and score >= 1:
+            st.markdown("""<div class="warn-box">
+            🏥 <b>Medical Pro 채널 경고</b><br>
+            공포 키워드가 포함된 제목은 조회수 <b>0.83배 감소</b> 효과 (p=0.017, 유의)<br>
+            전문성·신뢰 기반 제목으로 변경을 권장합니다.
+            </div>""", unsafe_allow_html=True)
+        elif my_type == "General" and score >= 1:
+            st.markdown("""<div class="info-box">
+            📱 <b>General 채널 참고</b><br>
+            공포 키워드 효과는 통계적으로 유의하지 않습니다 (1.14배, p=0.558)<br>
+            조회수 향상에 특별한 효과가 없으므로 채널 품질과 발행 빈도에 집중하세요.
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.markdown("""<div class="insight-box">
+            ✅ 공포 키워드가 없는 좋은 제목입니다. Medical Pro 채널에 이상적입니다.
+            </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── 공포 없이 고조회수 달성한 제목 TOP 20
+    st.markdown("### 🏆 공포 키워드 없이 고조회수 달성한 제목 TOP 20")
+    st.markdown("*벤치마킹 참고용 — 전문성·정보성 제목의 성공 사례*")
+    top_nofear = df_f[df_f["Has_Fear"] == 0].nlargest(20, "Views")[
+        ["Title", "Keyword", "Views", "Type", "Channel"]
+    ].copy()
+    top_nofear["조회수"] = top_nofear["Views"].apply(lambda x: f"{x/1e4:.1f}만")
+    top_nofear = top_nofear[["Title", "Keyword", "조회수", "Type"]].reset_index(drop=True)
+    top_nofear.index += 1
+    st.dataframe(top_nofear, use_container_width=True)
+
+    st.markdown("""<div class="insight-box">
+    💡 <b>패턴 관찰</b>: 상위 영상들은 "방법", "원인", "증상", "총정리", "완벽 가이드" 등
+    <b>정보 제공형 키워드</b>를 사용. 공포 없이도 높은 조회수 달성 가능.
+    </div>""", unsafe_allow_html=True)
 
 # ── 푸터
 st.markdown("---")
