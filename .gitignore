@@ -1,0 +1,47 @@
+# Secrets
+.env
+*.env
+www.youtube.com_cookies.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Large data files (raw CSVs — regenerate via collect_and_rebuild.py)
+src/4_medical_full_dataset.csv
+src/enriched_base.csv
+src/comments.csv
+src/channel_stats.csv
+src/thumbnail_features.csv
+src/precovid_videos.csv
+src/title_embeddings.npy
+
+# Thumbnails (2,372 images — too large for git)
+thumbnails/
+
+# Logs
+collect_rebuild_log.txt
+streamlit_*.txt
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+*.egg-info/
