@@ -16,12 +16,12 @@ env/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Large data files (raw CSVs — regenerate via collect_and_rebuild.py)
-src/4_medical_full_dataset.csv
-src/enriched_base.csv
-src/comments.csv
-src/channel_stats.csv
-src/thumbnail_features.csv
+# Raw intermediate CSVs (regenerated via collect_and_rebuild.py)
+src/1_medical_raw_massive.csv
+src/2_medical_diamond_verified.csv
+src/3_medical_platinum_final.csv
+src/medical_*.csv
+src/anomaly_report.csv
 src/precovid_videos.csv
 src/title_embeddings.npy
 
