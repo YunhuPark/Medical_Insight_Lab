@@ -2,7 +2,7 @@
 ### Fear Appeal in Korean Medical YouTube: From Naive Correlation to Causal Inference
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Dashboard-Live-FF4B4B?logo=streamlit)](https://yunhupark-medical-insight-lab-dashboard.streamlit.app)
+[![Streamlit](https://img.shields.io/badge/Dashboard-Live-FF4B4B?logo=streamlit)](https://medicalinsightlab-n598heosmpwubhkfyhjksm.streamlit.app)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Videos](https://img.shields.io/badge/Videos-3%2C713-red)](src/)
 [![Comments](https://img.shields.io/badge/Comments-19%2C232-orange)](src/)
