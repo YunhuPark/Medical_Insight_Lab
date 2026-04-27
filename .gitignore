@@ -16,6 +16,9 @@ env/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
+# Legacy scripts and intermediate data (pre-analysis pipeline)
+src/legacy/
+
 # Raw intermediate CSVs (regenerated via collect_and_rebuild.py)
 src/1_medical_raw_massive.csv
 src/2_medical_diamond_verified.csv

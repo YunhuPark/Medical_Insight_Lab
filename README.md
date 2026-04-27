@@ -2,11 +2,11 @@
 ### Fear Appeal in Korean Medical YouTube: From Naive Correlation to Causal Inference
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-FF4B4B?logo=streamlit)](https://streamlit.io)
+[![Streamlit](https://img.shields.io/badge/Dashboard-Live-FF4B4B?logo=streamlit)](https://yunhupark-medical-insight-lab-dashboard.streamlit.app)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Videos](https://img.shields.io/badge/Videos-3%2C713-red)](src/)
 [![Comments](https://img.shields.io/badge/Comments-19%2C232-orange)](src/)
-[![Analyses](https://img.shields.io/badge/Analyses-18-purple)](src/analysis/)
+[![Analyses](https://img.shields.io/badge/Analyses-12-purple)](src/analysis/)
 
 ---
 
@@ -46,6 +46,22 @@
 
 ---
 
+## 📊 핵심 결과 시각화
+
+### PSM 인과 추정 — 채널 규모 통제 후 역효과 확인
+![PSM Analysis](results/v2_04_psm_analysis.png)
+
+### 채널 유형 × 공포 키워드 상호작용
+![Type × Fear Interaction](results/v2_11_type_fear_interaction.png)
+
+### COVID-19 DiD 자연실험
+![COVID DiD](results/v2_05_covid_experiment.png)
+
+### 영상 나이 보정 (바이럴 속도)
+![Velocity Analysis](results/v2_01_velocity_analysis.png)
+
+---
+
 ## 📊 방법론 흐름
 
 ```
@@ -71,7 +87,8 @@
 Medical_Insight_Lab/
 ├── dashboard.py                        # 🖥️ Streamlit 인터랙티브 대시보드
 ├── collect_and_rebuild.py              # 🔄 전체 수집 + 분석 파이프라인
-├── requirements.txt
+├── requirements.txt                    # 대시보드용 (경량)
+├── requirements-full.txt               # 전체 분석 환경
 │
 ├── notebooks/
 │   ├── medical_youtube_final.ipynb           # 📓 최종 분석 노트북 (57 cells)
@@ -84,14 +101,13 @@ Medical_Insight_Lab/
 │   ├── comments.csv                    # 댓글 (19,232개 / 840개 영상)
 │   ├── channel_stats.csv               # 채널 구독자 수 (920/921)
 │   ├── thumbnail_features.csv          # 썸네일 CV 피처
-│   ├── title_embeddings.npy            # KoBERT 임베딩 벡터
 │   │
 │   ├── enrichment/                     # YouTube API 수집 스크립트
 │   │   ├── collect_all_subscribers.py
 │   │   ├── collect_all_comments.py
 │   │   └── collect_precovid_videos.py
 │   │
-│   └── analysis/                       # 18개 분석 스크립트
+│   └── analysis/                       # 12개 분석 스크립트
 │       ├── velocity_analysis.py        # 바이럴 속도 (영상 나이 보정)
 │       ├── posthoc_tests.py            # Dunn's Post-hoc (다중비교)
 │       ├── fixed_effects.py            # 채널 고정효과 회귀
@@ -105,7 +121,7 @@ Medical_Insight_Lab/
 │       ├── type_fear_interaction.py    # Type × Fear 상호작용
 │       └── shorts_analysis.py          # Shorts vs 일반영상 분리
 │
-├── results/                            # 분석 결과 이미지 (33개)
+├── results/                            # 분석 결과 이미지 (12개)
 └── thumbnails/                         # 썸네일 이미지 (2,372개)
 ```
 
@@ -116,19 +132,20 @@ Medical_Insight_Lab/
 ### 1. 환경 설정
 
 ```bash
-git clone https://github.com/<your-username>/Medical_Insight_Lab.git
+git clone https://github.com/YunhuPark/Medical_Insight_Lab.git
 cd Medical_Insight_Lab
 
 python -m venv venv
 venv\Scripts\activate          # Windows
 # source venv/bin/activate     # Mac/Linux
 
-pip install -r requirements.txt
+pip install -r requirements-full.txt
 ```
 
 ### 2. 대시보드 실행
 
 ```bash
+pip install -r requirements.txt
 streamlit run dashboard.py
 # → http://localhost:8501
 ```
@@ -190,21 +207,6 @@ python collect_and_rebuild.py
 | 시각화 | `matplotlib` · `seaborn` · `plotly` |
 | 대시보드 | `streamlit` |
 | 데이터 수집 | YouTube Data API v3 · `google-api-python-client` |
-
----
-
-## 📊 주요 시각화
-
-| 분석 | 파일 |
-|------|------|
-| 바이럴 속도 (나이 보정) | `results/v2_01_velocity_analysis.png` |
-| 카테고리 다중비교 | `results/v2_02_posthoc_dunn.png` |
-| 채널 고정효과 | `results/v2_03_fixed_effects.png` |
-| PSM 인과 추정 | `results/v2_04_psm_analysis.png` |
-| COVID DiD | `results/v2_05_covid_experiment.png` |
-| 썸네일 CV | `results/v2_07_thumbnail_cv.png` |
-| KoBERT 클러스터 | `results/v2_09_kobert_embedding.png` |
-| 채널 유형 × 공포 | `results/v2_11_type_fear_interaction.png` |
 
 ---
 
