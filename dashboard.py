@@ -37,7 +37,7 @@ st.markdown("""
   .metric-lbl{color:#aaa;font-size:.85em;margin-top:4px;}
   .insight-box{background:#1a2a1a;border-left:4px solid #27ae60;padding:14px 18px;border-radius:8px;margin:8px 0;}
   .warn-box{background:#2a1a1a;border-left:4px solid #e94560;padding:14px 18px;border-radius:8px;margin:8px 0;}
-  .info-box{background:#1a1a2a;border-left:4px solid #0f3460;padding:14px 18px;border-radius:8px;margin:8px 0;}
+  .info-box{background:#1a1a2a;border-left:4px solid #0f3460;padding:14px 18px;border-radius:8px;margin:8px 0;color:#e0e0e0;}
   div[data-testid="stMetricValue"]{color:#e94560;}
 </style>
 """, unsafe_allow_html=True)
@@ -734,7 +734,7 @@ with tab5:
             FEAR_COM  = ["무서워","겁나","두려","충격","공포","경악"]
 
             com2 = com.copy()
-            c_text = com2["Comment"].astype(str)
+            c_text = com2["Comment"].apply(lambda x: str(x) if x is not None else "")
             com2["pos"] = c_text.apply(lambda x: any(w in x for w in POS_WORDS)).astype(int)
             com2["neg"] = c_text.apply(lambda x: any(w in x for w in NEG_WORDS)).astype(int)
             com2["fear_reaction"] = c_text.apply(lambda x: any(w in x for w in FEAR_COM)).astype(int)
