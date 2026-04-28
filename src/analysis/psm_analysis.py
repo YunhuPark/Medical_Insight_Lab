@@ -75,17 +75,22 @@ def run_psm():
     ps_treated = ps[treated_idx]
     ps_control = ps[control_idx]
 
+    # Logit-scale caliper (표준 권고: 0.2 * SD(logit(ps)))
+    logit_ps = np.log(np.clip(ps, 1e-6, 1-1e-6) / (1 - np.clip(ps, 1e-6, 1-1e-6)))
+    caliper_logit = 0.2 * logit_ps.std()
+    logit_treated = logit_ps[treated_idx]
+    logit_control = logit_ps[control_idx]
+
     nn = NearestNeighbors(n_neighbors=1, metric='euclidean')
-    nn.fit(ps_control.reshape(-1,1))
-    distances, matched_idx = nn.kneighbors(ps_treated.reshape(-1,1))
+    nn.fit(logit_control.reshape(-1,1))
+    distances, matched_idx = nn.kneighbors(logit_treated.reshape(-1,1))
 
     matched_control_idx = [control_idx[i] for i in matched_idx.flatten()]
-    caliper = 0.05 * ps.std()  # Caliper = 0.2 SD
 
-    # Caliper 적용: 거리 초과 매칭 제거
+    # Caliper 적용: logit 거리 초과 매칭 제거
     valid_pairs = [(t, c) for t, c, d in zip(treated_idx, matched_control_idx, distances.flatten())
-                   if d <= caliper]
-    print(f"PSM 매칭 쌍: {len(valid_pairs)}쌍 (전체 처치: {len(treated_idx)}개, caliper={caliper:.4f})")
+                   if d <= caliper_logit]
+    print(f"PSM 매칭 쌍: {len(valid_pairs)}쌍 (전체 처치: {len(treated_idx)}개, logit caliper={caliper_logit:.4f})")
 
     t_idx = [p[0] for p in valid_pairs]
     c_idx = [p[1] for p in valid_pairs]
@@ -120,11 +125,22 @@ def run_psm():
     print(f"  배율: {ATT_ratio:.2f}배  Bootstrap 95% CI: [{ci_lo:.2f}, {ci_hi:.2f}]")
     print(f"  Wilcoxon p={p_psm:.4f} → {'★ 유의' if p_psm<0.05 else '비유의'}")
 
-    # 매칭 전후 공변량 균형 확인
-    pre_balance = abs(df[df['Has_Fear']==1]['Log_Ch_Med'].mean() -
-                      df[df['Has_Fear']==0]['Log_Ch_Med'].mean())
-    post_balance = abs(df.loc[t_idx,'Log_Ch_Med'].mean() -
-                       df.loc[c_idx,'Log_Ch_Med'].mean())
+    # 전체 공변량 SMD 계산
+    key_covs = ['Log_Ch_Med', 'Log_Age', 'Title_Length', 'Has_Number']
+    def smd(a, b):
+        pooled_std = np.sqrt((a.std()**2 + b.std()**2) / 2)
+        return abs(a.mean() - b.mean()) / pooled_std if pooled_std > 0 else 0
+
+    print("\n[공변량 균형 (SMD)]")
+    print(f"{'변수':<15} {'매칭 전':>10} {'매칭 후':>10} {'기준(0.1)':>10}")
+    for cov in key_covs:
+        pre  = smd(df[df['Has_Fear']==1][cov], df[df['Has_Fear']==0][cov])
+        post = smd(df.loc[t_idx, cov],          df.loc[c_idx, cov])
+        flag = "✅" if post < 0.1 else "⚠️"
+        print(f"  {cov:<13} {pre:>10.3f} {post:>10.3f} {flag}")
+
+    pre_balance  = smd(df[df['Has_Fear']==1]['Log_Ch_Med'], df[df['Has_Fear']==0]['Log_Ch_Med'])
+    post_balance = smd(df.loc[t_idx,'Log_Ch_Med'], df.loc[c_idx,'Log_Ch_Med'])
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 

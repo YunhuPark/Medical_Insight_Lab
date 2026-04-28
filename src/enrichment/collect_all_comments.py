@@ -16,7 +16,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env'))
 API_KEY = os.getenv('YOUTUBE_API_KEY')
 
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, '../3_medical_platinum_final.csv')
+DATA_PATH = os.path.join(BASE_DIR, '../4_medical_full_dataset.csv')
 OUT_PATH  = os.path.join(BASE_DIR, '../comments.csv')
 
 COMMENTS_PER_VIDEO = 30
