@@ -26,7 +26,6 @@ src/3_medical_platinum_final.csv
 src/medical_*.csv
 src/anomaly_report.csv
 src/precovid_videos.csv
-src/title_embeddings.npy
 
 # Thumbnails (2,372 images — too large for git)
 thumbnails/
