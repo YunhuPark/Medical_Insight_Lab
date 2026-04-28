@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax-check:
+    name: Syntax & Import Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dashboard dependencies
+        run: pip install -r requirements.txt
+
+      - name: Syntax check — analysis scripts
+        run: |
+          echo "Checking src/analysis/*.py ..."
+          for f in src/analysis/*.py; do
+            python -m py_compile "$f" && echo "  OK: $f"
+          done
+
+      - name: Syntax check — enrichment scripts
+        run: |
+          echo "Checking src/enrichment/*.py ..."
+          for f in src/enrichment/*.py; do
+            python -m py_compile "$f" && echo "  OK: $f"
+          done
+
+      - name: Syntax check — core files
+        run: |
+          python -m py_compile dashboard.py          && echo "  OK: dashboard.py"
+          python -m py_compile collect_and_rebuild.py && echo "  OK: collect_and_rebuild.py"
+
+      - name: AST parse — dashboard (encoding safe)
+        run: |
+          python -c "
+          import ast
+          with open('dashboard.py', encoding='utf-8') as f:
+              src = f.read()
+          ast.parse(src)
+          print('dashboard.py AST OK')
+          "
+
+      - name: Verify requirements.txt installs
+        run: |
+          pip check && echo "Dependency tree OK"

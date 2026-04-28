@@ -453,6 +453,145 @@ with tab3:
         일반 채널도 공포 키워드로 특별한 이득 없음
         </div>""", unsafe_allow_html=True)
 
+    # ── SCI급 통계 섹션
+    st.markdown("---")
+    st.markdown("### 🔬 SCI-Level Statistical Reporting")
+    st.markdown("*효과크기 · PSM 균형 진단 · 평행추세 검정 · 로젠바움 민감도*")
+
+    sci_col1, sci_col2 = st.columns(2)
+
+    with sci_col1:
+        # ── 효과크기 (Hedge's g + rank-r)
+        st.markdown("#### 효과크기 요약 (Hedge's g)")
+        eff_data = {
+            "비교": ["단순 비교\n(Log_Views)", "나이 보정\n(Log_VPD)", "General\n(Type×Fear)", "Medical Pro\n(Type×Fear)"],
+            "g":    [-0.053, -0.164, 0.071, -0.269],
+            "r":    [0.036, 0.093, -0.041, 0.133],
+            "power":[0.306, 0.963, 0.318, 0.618],
+            "p":    [0.147, 0.000, 0.137, 0.024],
+        }
+        eff_df = pd.DataFrame(eff_data)
+        fig_eff = go.Figure()
+        colors_eff = [C["red"] if abs(g) >= 0.2 else C["gray"] for g in eff_df["g"]]
+        fig_eff.add_trace(go.Bar(
+            y=eff_df["비교"], x=eff_df["g"],
+            orientation="h",
+            marker_color=colors_eff,
+            text=[f"g={g:+.3f} | power={pw:.2f} | p={p:.3f}"
+                  for g, pw, p in zip(eff_df["g"], eff_df["power"], eff_df["p"])],
+            textposition="outside",
+        ))
+        fig_eff.add_vline(x=0,   line_dash="dash",  line_color="white", line_width=1)
+        fig_eff.add_vline(x=0.2, line_dash="dot",   line_color="#27ae60", line_width=1)
+        fig_eff.add_vline(x=-0.2,line_dash="dot",   line_color="#27ae60", line_width=1)
+        fig_eff.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font_color="white", xaxis_title="Hedge's g",
+            title="빨강=|g|≥0.2 (small+) | 녹색점선=±0.2 임계값",
+            height=280, margin=dict(l=130, r=10)
+        )
+        st.plotly_chart(fig_eff, use_container_width=True)
+
+    with sci_col2:
+        # ── PSM Love Plot (SMD)
+        st.markdown("#### PSM Love Plot — 공변량 균형 (SMD)")
+        smd_data = {
+            "공변량":    ["Log_Ch_Med", "Log_Age", "Title_Length", "Has_Number", "Medical_Score"],
+            "SMD_전":   [-0.079,  0.249, 0.079,  0.002, -0.242],
+            "SMD_후":   [-0.159,  0.053, -0.010, 0.217, -0.015],
+        }
+        smd_d = pd.DataFrame(smd_data)
+        fig_smd = go.Figure()
+        fig_smd.add_trace(go.Scatter(
+            x=smd_d["SMD_전"], y=smd_d["공변량"],
+            mode="markers", name="매칭 전",
+            marker=dict(color=C["red"], size=12, symbol="diamond")
+        ))
+        fig_smd.add_trace(go.Scatter(
+            x=smd_d["SMD_후"], y=smd_d["공변량"],
+            mode="markers", name="매칭 후",
+            marker=dict(color="#27ae60", size=12, symbol="circle")
+        ))
+        for i, row in smd_d.iterrows():
+            fig_smd.add_trace(go.Scatter(
+                x=[row["SMD_전"], row["SMD_후"]], y=[row["공변량"], row["공변량"]],
+                mode="lines", line=dict(color="gray", width=1), showlegend=False
+            ))
+        fig_smd.add_vline(x=0,    line_dash="dash", line_color="white",   line_width=1.5)
+        fig_smd.add_vline(x=0.1,  line_dash="dot",  line_color="#f5a623", line_width=1)
+        fig_smd.add_vline(x=-0.1, line_dash="dot",  line_color="#f5a623", line_width=1)
+        fig_smd.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font_color="white", xaxis_title="SMD (|<0.1| = 균형)",
+            title="황색점선=±0.1 임계값 / Log_Ch_Med·Has_Number 불균형 주의",
+            height=280, margin=dict(l=130, r=10)
+        )
+        st.plotly_chart(fig_smd, use_container_width=True)
+
+    sci_col3, sci_col4 = st.columns(2)
+
+    with sci_col3:
+        # ── 평행추세 검정
+        st.markdown("#### DiD 평행추세 가정 검정 (2015–2019)")
+        pre_trends = df[(df["Year"].between(2015, 2019)) & (df["Is_Shorts"] == 0)].copy()
+        pt_grp = pre_trends.groupby(["Year", "Has_Fear"])["VPD"].mean().reset_index()
+        fig_pt = go.Figure()
+        for hf, label, col_ in [(0, "공포 미포함", C["blue"]), (1, "공포 포함", C["red"])]:
+            sub = pt_grp[pt_grp["Has_Fear"] == hf]
+            fig_pt.add_trace(go.Scatter(
+                x=sub["Year"], y=sub["VPD"], mode="lines+markers",
+                name=label, line=dict(color=col_, width=2.5), marker=dict(size=8)
+            ))
+            if len(sub) >= 2:
+                z = np.polyfit(sub["Year"], sub["VPD"], 1)
+                fig_pt.add_trace(go.Scatter(
+                    x=sub["Year"], y=np.poly1d(z)(sub["Year"]),
+                    mode="lines", line=dict(color=col_, dash="dash", width=1),
+                    showlegend=False
+                ))
+        fig_pt.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font_color="white", xaxis_title="연도 (Pre-COVID)",
+            yaxis_title="평균 Views/Day",
+            title="상호작용항 p=0.941 → ✓ 평행추세 충족",
+            height=280
+        )
+        st.plotly_chart(fig_pt, use_container_width=True)
+
+    with sci_col4:
+        # ── 로젠바움 민감도
+        st.markdown("#### 로젠바움 민감도 분석 (PSM 강건성)")
+        rb_data = {
+            "Gamma": [1.00, 1.05, 1.10, 1.25, 1.50, 2.00, 3.00],
+            "p_upper": [0.0001, 0.0009, 0.0061, 0.2404, 1.0, 1.0, 1.0],
+        }
+        rb_df = pd.DataFrame(rb_data)
+        bar_c = [C["green"] if p < 0.05 else C["red"] for p in rb_df["p_upper"]]
+        fig_rb = go.Figure(go.Bar(
+            x=rb_df["Gamma"], y=rb_df["p_upper"].clip(upper=1.0),
+            marker_color=bar_c, width=0.08,
+            text=[f"p={p:.4f}" if p < 0.5 else "p>0.5" for p in rb_df["p_upper"]],
+            textposition="outside"
+        ))
+        fig_rb.add_hline(y=0.05, line_dash="dash", line_color="#f5a623",
+                          line_width=2, annotation_text="α=0.05")
+        fig_rb.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font_color="white", xaxis_title="Γ (숨겨진 편향 크기)",
+            yaxis_title="p값 상한", yaxis_range=[0, 1.15],
+            title="Γ≈1.15에서 결과 번복 → PSM 결과는 보수적 해석 필요",
+            height=280
+        )
+        st.plotly_chart(fig_rb, use_container_width=True)
+
+    st.markdown("""<div class="info-box">
+    <b>SCI 수준 해석 요약</b><br>
+    • <b>효과크기</b>: Medical Pro g=-0.269 (small 수준) — 통계적으로 유의하나 실용적 크기는 제한적<br>
+    • <b>PSM 균형</b>: 5개 공변량 중 3개 균형 달성, 2개(Log_Ch_Med, Has_Number) 불균형 → 한계로 명시 필요<br>
+    • <b>평행추세</b>: p=0.941 → DiD 핵심 가정 강하게 충족<br>
+    • <b>민감도</b>: Γ≈1.15에서 결과 번복 → 숨겨진 혼란변수 15% 이상이면 인과 해석 위험 → 관찰 연구의 본질적 한계
+    </div>""", unsafe_allow_html=True)
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # TAB 4: CHANNEL EXPLORER
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
