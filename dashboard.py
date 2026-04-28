@@ -35,8 +35,8 @@ st.markdown("""
   .metric-card{background:#1a1a3e;border-radius:12px;padding:20px;text-align:center;border:1px solid #e94560;}
   .metric-val{font-size:2em;font-weight:700;color:#e94560;}
   .metric-lbl{color:#aaa;font-size:.85em;margin-top:4px;}
-  .insight-box{background:#1a2a1a;border-left:4px solid #27ae60;padding:14px 18px;border-radius:8px;margin:8px 0;}
-  .warn-box{background:#2a1a1a;border-left:4px solid #e94560;padding:14px 18px;border-radius:8px;margin:8px 0;}
+  .insight-box{background:#1a2a1a;border-left:4px solid #27ae60;padding:14px 18px;border-radius:8px;margin:8px 0;color:#e0e0e0;}
+  .warn-box{background:#2a1a1a;border-left:4px solid #e94560;padding:14px 18px;border-radius:8px;margin:8px 0;color:#e0e0e0;}
   .info-box{background:#1a1a2a;border-left:4px solid #0f3460;padding:14px 18px;border-radius:8px;margin:8px 0;color:#e0e0e0;}
   div[data-testid="stMetricValue"]{color:#e94560;}
 </style>
