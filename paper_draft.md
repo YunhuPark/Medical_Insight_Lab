@@ -17,7 +17,7 @@ A Propensity Score Matching and Difference-in-Differences Approach**
 
 **목적**: 본 연구는 한국 의료 유튜브 콘텐츠에서 공포·위험 키워드가 포함된 제목이 조회수에 미치는 인과적 영향을 규명하고자 하였다. 기존 연구들은 단순 상관관계 분석에 그쳐 채널 규모 등 주요 혼란변수를 통제하지 못했다는 한계가 있다.
 
-**방법**: YouTube Data API v3를 통해 37개 질환 카테고리의 한국 의료 유튜브 영상 3,713개(921개 채널, 2013–2026년)를 수집하였다. 분석은 단순 비교(Mann-Whitney U), 영상 나이 보정(Views Per Day), 성향점수매칭(PSM), 채널 고정효과 회귀, COVID-19 이중차분법(DiD)의 5단계로 진행하였다. 채널 유형(의료전문 vs. 일반)별 조절 효과를 검토하고, OpenCV 기반 썸네일 분석, KoBERT 제목 임베딩, 댓글 감성 분석을 포함하는 멀티모달 파이프라인을 구축하였다.
+**방법**: YouTube Data API v3를 통해 37개 질환 카테고리의 한국 의료 유튜브 영상 3,713개(1,220개 채널, 2013–2026년)를 수집하였다. 분석은 단순 비교(Mann-Whitney U), 영상 나이 보정(Views Per Day), 성향점수매칭(PSM), 채널 고정효과 회귀, COVID-19 이중차분법(DiD)의 5단계로 진행하였다. 채널 유형(의료전문 vs. 일반)별 조절 효과를 검토하고, OpenCV 기반 썸네일 분석, KoBERT 제목 임베딩, 댓글 감성 분석을 포함하는 멀티모달 파이프라인을 구축하였다.
 
 **결과**: 단순 비교에서 공포 키워드 포함 영상이 2.1배 높은 조회수를 보였으나(p<0.05), 영상 나이 보정 후 효과는 소멸하였다(p=0.9999). PSM으로 채널 규모를 통제한 결과 공포 키워드가 오히려 조회수를 0.63배 감소시키는 역효과가 확인되었다(p=0.019, Bootstrap 95% CI: [0.44, 0.85]). 채널 고정효과 분석에서는 +7%(p=0.306), COVID-19 DiD 분석에서는 +3.4%(95% CI: [-20.8%, +34.7%])로 모두 비유의하였다. 채널 유형별 조절 효과 분석에서 의료전문 채널의 경우 공포 키워드가 조회수를 0.83배 유의하게 감소시킨 반면(p=0.017, Hedge's g=-0.269), 일반 채널에서는 유의한 효과가 없었다(1.14배, p=0.558).
 
@@ -31,7 +31,7 @@ A Propensity Score Matching and Difference-in-Differences Approach**
 
 **Purpose**: This study aimed to identify the causal effect of fear- and risk-laden keywords in video titles on view counts in Korean medical YouTube content. Previous studies have been limited to simple correlation analyses and failed to control for major confounders such as channel size.
 
-**Methods**: A total of 3,713 Korean medical YouTube videos (921 channels, 2013–2026) across 37 disease categories were collected via the YouTube Data API v3. Analysis proceeded in five stages: naive comparison (Mann-Whitney U), video age correction (Views Per Day), propensity score matching (PSM), channel fixed-effects regression, and a COVID-19 difference-in-differences (DiD) natural experiment. Moderating effects by channel type (Medical Professional vs. General) were examined. A multimodal pipeline was constructed incorporating OpenCV-based thumbnail analysis, KoBERT title embeddings, and comment sentiment analysis.
+**Methods**: A total of 3,713 Korean medical YouTube videos (1,220 channels, 2013–2026) across 37 disease categories were collected via the YouTube Data API v3. Analysis proceeded in five stages: naive comparison (Mann-Whitney U), video age correction (Views Per Day), propensity score matching (PSM), channel fixed-effects regression, and a COVID-19 difference-in-differences (DiD) natural experiment. Moderating effects by channel type (Medical Professional vs. General) were examined. A multimodal pipeline was constructed incorporating OpenCV-based thumbnail analysis, KoBERT title embeddings, and comment sentiment analysis.
 
 **Results**: In naive comparison, videos containing fear keywords showed 2.1 times higher view counts (p<0.05); however, this effect disappeared after age correction (p=0.9999). PSM controlling for channel size revealed a reverse effect, with fear keywords associated with a 0.63-fold decrease in views (p=0.019, Bootstrap 95% CI: [0.44, 0.85]). Channel fixed-effects yielded a non-significant +7% (p=0.306), and COVID-19 DiD analysis yielded a non-significant +3.4% (95% CI: [-20.8%, +34.7%]). Moderation analysis showed that fear keywords significantly decreased views in Medical Professional channels (0.83x, p=0.017, Hedge's g=-0.269), while no significant effect was found in General channels (1.14x, p=0.558).
 
@@ -78,7 +78,7 @@ A Propensity Score Matching and Difference-in-Differences Approach**
 
 YouTube Data API v3를 활용하여 2013년부터 2026년 4월까지 업로드된 한국 의료 유튜브 영상을 수집하였다. 검색 키워드는 '당뇨', '고혈압', '암', '심장', '뇌졸중' 등 37개 질환 카테고리로 구성하였으며, 수집 기준은 (1) 한국어 제목 및 설명, (2) 조회수 100회 이상, (3) 업로드 후 30일 이상 경과로 설정하였다.
 
-최종 분석 데이터셋은 **3,713개 영상, 921개 채널**로 구성되었다. pre-COVID 기간(2018–2019년)의 데이터 부족 문제를 보완하기 위해 targeted collection을 통해 606개 영상을 추가 수집하여 병합하였다. 데이터 수집 기준일은 2026년 4월 19일이며, 모든 조회수 및 좋아요 수는 해당 시점의 스냅샷이다.
+최종 분석 데이터셋은 **3,713개 영상, 1,220개 채널**로 구성되었다. pre-COVID 기간(2018–2019년)의 데이터 부족 문제를 보완하기 위해 targeted collection을 통해 606개 영상을 추가 수집하여 병합하였다. 데이터 수집 기준일은 2026년 4월 19일이며, 모든 조회수 및 좋아요 수는 해당 시점의 스냅샷이다.
 
 ### 2.2 변수 정의
 

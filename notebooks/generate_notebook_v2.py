@@ -25,7 +25,7 @@ md("""
   <h2 style="color:#f0f0f0;font-size:1.2em;font-weight:300;margin:0 0 30px">공포 소구의 진실: 단순 상관에서 인과 추정까지</h2>
   <div style="display:flex;justify-content:center;gap:30px;flex-wrap:wrap;color:#aaa;font-size:0.9em">
     <span>📊 <b style="color:#e94560">3,713</b>개 영상</span>
-    <span>📡 <b style="color:#e94560">921</b>개 채널 (구독자 99%)</span>
+    <span>📡 <b style="color:#e94560">1,220</b>개 채널 (구독자 확보 920개)</span>
     <span>🏷️ <b style="color:#e94560">22</b>개 질환</span>
     <span>💬 <b style="color:#e94560">19,232</b>개 댓글</span>
     <span>📅 2013 – 2026</span>
@@ -778,7 +778,7 @@ md("""---
 | 한계 | 세부 내용 | 영향 |
 |------|-----------|------|
 | **댓글 수집 커버리지** | 2,512개 영상 중 840개 댓글 수집 (33%) | 감성 분석 대표성 부분적 |
-| **구독자 수 커버리지** | 921개 채널 중 920개 수집 (99.9%) | 채널 규모 분석 신뢰도 높음 |
+| **구독자 수 커버리지** | 1,220개 채널 중 920개 수집 (75.4%, 영상 기준 3,100/3,713 = 83.5%) | 채널 규모 통제는 이 부분집합에서만 가능 |
 | **Shorts 알고리즘 미통제** | 1,010개 Shorts(27.2%)가 일반 영상과 혼합 분석됨 | Fear 효과 추정 왜곡 가능 |
 
 ### 15.2 방법론 한계

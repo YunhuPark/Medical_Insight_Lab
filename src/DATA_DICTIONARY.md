@@ -9,7 +9,7 @@
 | `Video_ID` | string | YouTube 11-char ID | Unique identifier for each video. Primary key. |
 | `Keyword` | string | 37 disease categories | Search keyword used to discover the video (e.g., "당뇨", "고혈압", "암"). |
 | `Title` | string | — | Video title as returned by YouTube Data API v3. |
-| `Channel` | string | 921 unique channels | YouTube channel name (display name, not channel ID). |
+| `Channel` | string | 1,220 unique channels | YouTube channel name (display name, not channel ID). |
 | `Views` | int | 101 – 9,985,009 | Total cumulative view count at time of collection (2026-04-19). |
 | `Likes` | int | 0 – 107,767 | Total like count at collection time. |
 | `Published_At` | datetime (UTC) | 2013 – 2026 | ISO 8601 timestamp of video publication. |
@@ -54,7 +54,9 @@ Same 3,713 rows with derived features added during analysis. Superset of `4_medi
 
 ## channel_stats.csv (Channel Statistics)
 
-920 rows. One row per channel (920/921 channels; 1 channel had no accessible data).
+921 rows. One row per channel for which subscriber collection was attempted; 920 carry a
+subscriber value (1 channel had no accessible data). These 920 channels cover 3,100 of the
+dataset's 3,713 videos (83.5%) and 920 of its 1,220 channels (75.4%).
 
 | Column | Type | Description |
 |--------|------|-------------|

@@ -21,7 +21,7 @@
 
 한국 의료 유튜브에서 **공포·위험 키워드 포함 제목**이 조회수에 미치는 인과적 영향을 분석합니다.
 
-- **데이터**: YouTube Data API로 수집한 3,713개 영상 / 921개 채널 / 37개 질환 카테고리
+- **데이터**: YouTube Data API로 수집한 3,713개 영상 / 1,220개 채널 / 37개 질환 카테고리
 - **핵심 방법**: 단순 비교 → 영상 나이 보정 → PSM → 채널 고정효과 → DiD 자연실험
 - **결론**: 공포 효과는 채널 규모의 착시였으며, 의료 전문 채널에서는 유의한 역효과 확인
 
@@ -99,7 +99,7 @@ Medical_Insight_Lab/
 │   ├── 4_medical_full_dataset.csv      # 메인 데이터셋 (3,713개 영상)
 │   ├── enriched_base.csv               # 피처 엔지니어링 완료 버전
 │   ├── comments.csv                    # 댓글 (19,232개 / 840개 영상)
-│   ├── channel_stats.csv               # 채널 구독자 수 (920/921)
+│   ├── channel_stats.csv               # 채널 구독자 수 (1,220개 중 920개 채널)
 │   ├── thumbnail_features.csv          # 썸네일 CV 피처
 │   │
 │   ├── enrichment/                     # YouTube API 수집 스크립트
