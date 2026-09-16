@@ -217,8 +217,8 @@ with tab2:
     st.markdown("## 🔥 공포 키워드 분석")
 
     st.markdown("""<div class="warn-box">
-    ⚠️ <b>결론 미리보기</b>: 단순 비교에서 2.1배로 보이던 공포 키워드 효과는,
-    영상 나이 보정 후 <b>p=0.9999로 소멸</b>합니다. 채널 규모를 통제(PSM)하면 오히려 <b>0.63배 역효과</b>.
+    ⚠️ <b>결론 미리보기</b>: 단순 비교에서도 공포 키워드 포함 영상은 0.78배로 낮았고,
+    영상 나이 보정(VPD) 후에는 <b>0.56배로 효과가 더 뚜렷</b>해집니다. 채널 규모를 통제(PSM)해도 <b>0.63배 역효과</b>는 유지됩니다.
     </div>""", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
@@ -329,8 +329,20 @@ with tab3:
     # ── 방법론 비교 요약 차트
     st.markdown("### 방법론별 공포 키워드 효과 추정치")
     methods = ["단순 비교", "나이 보정\n(VPD)", "PSM\n매칭", "채널\n고정효과"]
-    effects = [2.1, 0.53, 0.63, 1.07]
-    pvals   = [0.001, 0.9999, 0.019, 0.306]
+
+    # Stages 1-2 are recomputed from the loaded data on every run. They used to be
+    # literals carried over from the v1 dataset (2.1 / 0.53), which silently stayed
+    # put when the dataset grew to 3,713 videos. Stages 3-4 still come from the
+    # analysis scripts as constants; see the correction note in README.md.
+    _f  = df[df["Has_Fear"] == 1]
+    _nf = df[df["Has_Fear"] == 0]
+    naive_ratio = _f["Views"].median() / _nf["Views"].median()
+    vpd_ratio   = _f["VPD"].median()   / _nf["VPD"].median()
+    naive_p = stats.mannwhitneyu(_f["Views"], _nf["Views"], alternative="two-sided").pvalue
+    vpd_p   = stats.mannwhitneyu(_f["VPD"],   _nf["VPD"],   alternative="two-sided").pvalue
+
+    effects = [naive_ratio, vpd_ratio, 0.63, 1.07]
+    pvals   = [naive_p, vpd_p, 0.019, 0.306]
     colors  = [C["blue"] if p < 0.05 else C["gray"] for p in pvals]
     colors[2] = C["red"]  # PSM 역효과 강조
 
@@ -338,11 +350,12 @@ with tab3:
     fig.add_hline(y=1.0, line_dash="dash", line_color="white", line_width=1.5,
                   annotation_text="효과 없음 (1.0)", annotation_font_color="white")
     fig.add_trace(go.Bar(x=methods, y=effects, marker_color=colors,
-                         text=[f"{e:.2f}배<br>p={p:.3f}" for e, p in zip(effects, pvals)],
+                         text=[f"{e:.2f}배<br>p={p:.3f}" if p >= 0.001 else f"{e:.2f}배<br>p&lt;.001"
+                               for e, p in zip(effects, pvals)],
                          textposition="outside"))
     fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                       font_color="white", yaxis_title="공포 포함/미포함 배율",
-                      yaxis_range=[0, 2.8],
+                      yaxis_range=[0, max(1.3, max(effects) * 1.35)],
                       title="빨강=유의 역효과 | 회색=비유의 | 파랑=유의 양효과")
     st.plotly_chart(fig, use_container_width=True)
 
@@ -911,9 +924,9 @@ with tab6:
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("""<div class="warn-box">
-        <h4 style="color:#e94560;margin-top:0">❌ 검증된 착시</h4>
-        단순 비교 <b>+2.1배</b> 효과는<br>채널 규모 교란변수의 산물<br><br>
-        대형 채널이 공포 키워드를 자주 사용하고,<br>대형 채널은 원래 조회수가 높음
+        <h4 style="color:#e94560;margin-top:0">❌ 처음부터 없던 양의 효과</h4>
+        단순 비교부터 <b>0.78배</b>로 낮고,<br>나이 보정 후 <b>0.56배</b>로 더 낮아짐<br><br>
+        "공포 제목이 조회수를 올린다"는 통념 자체가 이 데이터와 맞지 않음
         </div>""", unsafe_allow_html=True)
     with c2:
         st.markdown("""<div class="warn-box">
