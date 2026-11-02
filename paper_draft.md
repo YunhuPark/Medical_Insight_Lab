@@ -24,11 +24,11 @@ A Propensity Score Matching and Difference-in-Differences Approach**
 > v2 문서에 재계산 없이 옮겨졌습니다. 현재 shipped 데이터(`src/4_medical_full_dataset.csv`,
 > 3,713개 영상)에 동일한 공포 키워드 목록과 기준일(2026-04-19)을 적용하면
 > 단순 비교 **0.78배**(Mann-Whitney p=.033), 나이 보정(VPD) **0.56배**(p=1.6e-06)입니다.
-> 즉 효과가 "소멸"하는 것이 아니라 보정할수록 더 뚜렷해집니다. PSM 0.63배는
-> `psm_analysis.py`가 현재 CSV에서 계산하므로 정확합니다. 본문을 고치기 전까지
+> 즉 효과가 "소멸"하는 것이 아니라 보정할수록 더 뚜렷해집니다. PSM은 2026-11-02 scikit-learn 재실행에서 0.65배(§3.4)로 확인되었으며,
+> 이전 표기인 0.63배는 재현되지 않았습니다. 본문을 고치기 전까지
 > 이 절의 서술(단순 상관 → 역전)을 그대로 인용하지 마십시오.
 
-**결과**: 단순 비교에서 공포 키워드 포함 영상의 조회수는 미포함 영상의 0.78배였으며(p=.033), 영상 나이 보정 후에는 효과가 소멸하지 않고 오히려 더 뚜렷해졌다(0.56배, p<.001). PSM으로 채널 규모를 통제한 결과에서도 감소는 유지되었다(0.63배, p=0.019, Bootstrap 95% CI: [0.44, 0.85]) — 단, 이 PSM 수치는 §3.4에서 2026-09-16 재실행 시 재현되지 않았다(재실행값 0.71배, p=.068, 경계). 채널 고정효과 분석에서는 +7%(p=0.306), COVID-19 DiD 분석에서는 +3.4%(95% CI: [-20.8%, +34.7%])로 모두 비유의하였다. 채널 유형별 조절 효과 분석에서 의료전문 채널의 경우 공포 키워드가 조회수를 0.83배 유의하게 감소시킨 반면(p=0.017, Hedge's g=-0.269), 일반 채널에서는 유의한 효과가 없었다(1.14배, p=0.558). *(단순 비교·나이 보정 수치는 2026-09-16 shipped 데이터로 재계산한 값이며, 원문의 2.1배/소멸 서술이 재현되지 않은 사유는 3장 서두의 경고를 참고.)*
+**결과**: 단순 비교에서 공포 키워드 포함 영상의 조회수는 미포함 영상의 0.78배였으며(p=.033), 영상 나이 보정 후에는 효과가 소멸하지 않고 오히려 더 뚜렷해졌다(0.56배, p<.001). PSM으로 채널 규모를 통제한 결과에서도 감소는 유지되었다(0.65배, p=0.036, Bootstrap 95% CI: [0.45, 0.90]; scikit-learn 재실행, §3.4) — 이전에 보고한 0.63배(p=.019)는 재현되지 않았고, 순수 numpy 구현의 재실행값은 0.71배(p=.068, 경계)였다. 채널 고정효과 분석에서는 +7%(p=0.306), COVID-19 DiD 분석에서는 +3.4%(95% CI: [-20.8%, +34.7%])로 모두 비유의하였다. 채널 유형별 조절 효과 분석에서 의료전문 채널의 경우 공포 키워드가 조회수를 0.83배 유의하게 감소시킨 반면(p=0.017, Hedge's g=-0.269), 일반 채널에서는 유의한 효과가 없었다(1.14배, p=0.558). *(단순 비교·나이 보정 수치는 2026-09-16 shipped 데이터로 재계산한 값이며, 원문의 2.1배/소멸 서술이 재현되지 않은 사유는 3장 서두의 경고를 참고.)*
 
 **결론**: 공포 소구는 어느 분석 단계에서도 조회수 증대 효과를 보이지 않았다. 단순 비교와 나이 보정은 일관되게 조회수 감소를 가리켰고, 채널 규모를 통제한 PSM도 같은 방향을 가리켰으나 재실행 시 통상적 유의수준을 충족하지 못했다(§3.4 참고). 특히 의료전문 채널에서 공포 키워드는 조회수를 유의하게 감소시켜, 전문성 기반 신뢰를 기대하는 시청자의 반응과 일치하였다. 본 결과는 의료 정보 채널의 제목 전략 수립과 공중보건 커뮤니케이션 정책에 실질적 시사점을 제공한다.
 
@@ -42,7 +42,7 @@ A Propensity Score Matching and Difference-in-Differences Approach**
 
 **Methods**: A total of 3,713 Korean medical YouTube videos (1,220 channels, 2013–2026) across 37 disease categories were collected via the YouTube Data API v3. Analysis proceeded in five stages: naive comparison (Mann-Whitney U), video age correction (Views Per Day), propensity score matching (PSM), channel fixed-effects regression, and a COVID-19 difference-in-differences (DiD) natural experiment. Moderating effects by channel type (Medical Professional vs. General) were examined. A multimodal pipeline was constructed incorporating OpenCV-based thumbnail analysis, KoBERT title embeddings, and comment sentiment analysis.
 
-**Results**: In naive comparison, videos containing fear keywords showed 0.78 times the view count of non-fear videos (p=.033); this effect sharpened, rather than disappeared, after age correction (0.56-fold, p<.001). PSM controlling for channel size initially confirmed the decrease persisted (0.63-fold, p=.019, Bootstrap 95% CI: [0.44, 0.85]) — though this PSM figure did not reproduce on a 2026-09-16 re-run (0.71-fold, p=.068, borderline; see Section 3.4). Channel fixed-effects yielded a non-significant +7% (p=0.306), and COVID-19 DiD analysis yielded a non-significant +3.4% (95% CI: [-20.8%, +34.7%]). Moderation analysis showed that fear keywords significantly decreased views in Medical Professional channels (0.83x, p=0.017, Hedge's g=-0.269), while no significant effect was found in General channels (1.14x, p=0.558). *(The naive and age-corrected figures above were recomputed on 2026-09-16 from the shipped dataset; see the note preceding Section 3 for why the originally reported 2.1x/1.14x could not be reproduced.)*
+**Results**: In naive comparison, videos containing fear keywords showed 0.78 times the view count of non-fear videos (p=.033); this effect sharpened, rather than disappeared, after age correction (0.56-fold, p<.001). PSM controlling for channel size initially confirmed the decrease persisted (0.65-fold, p=.036, Bootstrap 95% CI: [0.45, 0.90]; scikit-learn re-run, see Section 3.4) — the previously reported 0.63-fold (p=.019) did not reproduce, and a pure-numpy re-run gave 0.71-fold (p=.068, borderline). Channel fixed-effects yielded a non-significant +7% (p=0.306), and COVID-19 DiD analysis yielded a non-significant +3.4% (95% CI: [-20.8%, +34.7%]). Moderation analysis showed that fear keywords significantly decreased views in Medical Professional channels (0.83x, p=0.017, Hedge's g=-0.269), while no significant effect was found in General channels (1.14x, p=0.558). *(The naive and age-corrected figures above were recomputed on 2026-09-16 from the shipped dataset; see the note preceding Section 3 for why the originally reported 2.1x/1.14x could not be reproduced.)*
 
 **Conclusion**: Fear appeals showed no view-count advantage at any stage of analysis; naive comparison and age correction pointed to a consistent decrease in views, and channel-size-controlled PSM pointed the same direction but did not clear conventional significance on re-run (Section 3.4). In Medical Professional channels, fear keywords significantly reduced view counts, consistent with audience expectations of expert, trustworthy communication. These findings provide practical implications for title strategy in medical information channels and public health communication policy.
 
@@ -174,6 +174,12 @@ multilingual-e5-small 모델[15]을 활용하여 2,512개 영상 제목을 벡�
 > 남은 조치: 포트폴리오와 README는 여전히 PSM 0.63배를 헤드라인으로 쓰고 있습니다. 이 문서는 3.4절만
 > 정정했고 포트폴리오/README/cover_letter는 아직 고치지 않았습니다 — 유의→경계 전환이 프로젝트 전체 서사에
 > 미치는 영향을 판단하실 동안 그대로 두었습니다.
+>
+> **2026-11-02 업데이트 — scikit-learn이 작동하는 환경에서 재확인했습니다.** `psm_analysis.py`를 원본 그대로 실행한 결과
+> 0.65배(Bootstrap 95% CI [0.45, 0.90], Wilcoxon p=.036, 807쌍)가 나왔습니다. 즉 0.63배/p=.019는 numpy 구현에서도,
+> scikit-learn에서도 재현되지 않았고, 두 구현의 결과도 서로 다릅니다(0.71배/p=.068 vs 0.65배/p=.036). 방향은 같지만
+> 유의성은 구현에 따라 .05의 양쪽에 놓입니다. 이에 맞춰 README와 cover_letter를 정정했습니다(같은 날짜).
+> `dashboard.py`와 `notebooks/`의 생성 스크립트·실행 결과에는 이전 표기(0.63배)가 아직 남아 있습니다.
 
 ### 3.1 기술 통계
 
@@ -197,6 +203,8 @@ ATT 추정 결과 처치군 중앙 조회수는 18,798회, 대조군은 26,578�
 
 > **본 절의 수치는 2026-09-16 재실행 값이다.** 이전 버전은 매칭 582쌍, ATT=0.63배, Wilcoxon p=0.019, Bootstrap 95% CI [0.44, 0.85], AUC=0.74, Rosenbaum Γ≈1.15(p_upper=0.240)로 보고했다. 위 §3 서두에서 설명했듯, 현재 shipped 데이터셋에 동일 코드를 재적용하면 이 수치가 재현되지 않는다. 원인은 확정하지 못했다 — 데이터셋 스냅샷 차이일 가능성이 가장 높으나(다른 모든 분석은 정확히 재현됨), 로지스틱 회귀 구현체 차이(sklearn vs 본 재실행의 순수 numpy 구현)를 완전히 배제할 수는 없다. 아래 Rosenbaum 민감도 분석은 별도의 SMD 진단용 매칭(effect_size_power.py, Shorts 제외, raw-ps caliper)에서 계산된 것으로, PSM 헤드라인 검정과는 다른 표본·다른 검정(부호검정 근사)을 사용한다.
 
+> **2026-11-02 scikit-learn 재확인.** scikit-learn이 작동하는 환경에서 `psm_analysis.py`를 원본 그대로 실행하면, logit caliper(0.369)로 807쌍(처치 952개 중)이 매칭되고 처치군 중앙 조회수 18,798회, 대조군 29,016회로 ATT 배율 0.65배(Bootstrap 95% CI [0.45, 0.90], Wilcoxon p=0.0361)였다. 공변량 SMD(매칭 전→후)는 Log_Ch_Med 0.104→0.037, Log_Age 0.229→0.013, Title_Length 0.126→0.035, Has_Number 0.037→0.106이다(Has_Number는 기준 0.1을 소폭 초과). 따라서 이전 보고값(0.63배, p=.019, 582쌍)은 두 구현 모두에서 재현되지 않았고, 순수 numpy 구현(0.71배, p=.068)과 scikit-learn(0.65배, p=.036)의 결과도 서로 다르다. 방향(배율<1)은 일치하지만 Wilcoxon 유의성은 구현에 따라 .05의 양쪽에 놓이므로, PSM 결과는 "방향은 일관, 유의성은 구현에 민감"으로 해석해야 한다.
+
 Shorts를 제외한 별도 매칭(공변량 균형 진단용, raw-ps caliper=0.05×SD(ps)=0.0128)에서는 612쌍이 확보되었으며, 로젠바움 민감도 분석 결과 Γ=1.00에서 p_upper=0.0016, Γ=1.10에서 p_upper=0.048로 여전히 유의했으나 Γ=1.25에서 p_upper=0.684로 결과가 뒤집혔다. 임계 Γ는 1.10과 1.25 사이이며, 이는 원문이 보고한 Γ≈1.15와 대체로 부합한다.
 
 ### 3.5 채널 고정효과 (H4)
@@ -219,7 +227,7 @@ DiD 추정량은 +3.41%(Bootstrap 95% CI: [-20.8%, +34.7%], n_pre-nofear=859, n_
 |-----------|------------|-----|--------|----------|
 | 단순 비교 (Mann-Whitney) | 0.78배 | 0.033 | — | ✅ 유의 |
 | 나이 보정 (VPD) | 0.56배 | <0.001 | — | ✅ 유의 |
-| PSM (Bootstrap)† | 0.71배 | 0.068 | [0.50, 0.93] | ⚠️ 경계 (원문: 0.63배/p=.019) |
+| PSM (Bootstrap)† | 0.65배 (sklearn) / 0.71배 (numpy) | 0.036 / 0.068 | [0.45, 0.90] / [0.50, 0.93] | ⚠️ 구현에 따라 유의~경계 (원문: 0.63배/p=.019, 재현 안 됨) |
 | 채널 고정효과 | +7.0% | 0.306 | — | ❌ 비유의 |
 | DiD (COVID-19) | +3.41% | — | [-20.8%, +34.7%] | ❌ 비유의 |
 | 평행추세 검정 | 계수 +0.0058 | 0.941 | — | ✅ 가정 충족 |
@@ -240,7 +248,7 @@ KoBERT 클러스터링 결과 9개의 의미적 군집이 도출되었다(Silhou
 
 ### 4.1 주요 발견의 해석
 
-본 연구의 핵심 발견은 공포 소구가 단순 비교 단계에서부터 조회수와 유의한 음의 관계를 보였으며(0.78배), 영상 나이와 채널 규모를 통제할수록 이 관계가 약화되지 않고 오히려 더 뚜렷해졌다는 것이다(나이 보정 0.56배, PSM 0.63배 — PSM 재현 여부는 §3.4 참조). 즉 대형 채널의 공포 키워드 사용 패턴이 만들어낸 양의 착시를 걷어낸 결과가 아니라, 처음부터 존재하지 않았던 양의 효과를 여러 방법으로 재확인한 것에 가깝다. 다만 채널 고정효과와 DiD 분석에서는 유의한 효과가 발견되지 않아, 채널 간 비교에서 관찰된 감소가 채널 내부 비교나 외생적 충격(COVID-19)에서는 재현되지 않았다.
+본 연구의 핵심 발견은 공포 소구가 단순 비교 단계에서부터 조회수와 유의한 음의 관계를 보였으며(0.78배), 영상 나이와 채널 규모를 통제할수록 이 관계가 약화되지 않고 오히려 더 뚜렷해졌다는 것이다(나이 보정 0.56배, PSM 약 0.65배 — 원문의 0.63배는 재현되지 않았으며 §3.4 참조). 즉 대형 채널의 공포 키워드 사용 패턴이 만들어낸 양의 착시를 걷어낸 결과가 아니라, 처음부터 존재하지 않았던 양의 효과를 여러 방법으로 재확인한 것에 가깝다. 다만 채널 고정효과와 DiD 분석에서는 유의한 효과가 발견되지 않아, 채널 간 비교에서 관찰된 감소가 채널 내부 비교나 외생적 충격(COVID-19)에서는 재현되지 않았다.
 
 이러한 결과는 온라인 건강 정보에서 자극적 제목 전략의 효과에 대한 기존 가정에 의문을 제기한다. 다수의 선행 연구[2,6]가 클릭베이트적 요소와 참여도의 양의 관계를 보고하였으나, 이는 채널 규모라는 교란변수를 통제하지 않은 결과일 가능성이 높다.
 
@@ -264,7 +272,7 @@ KoBERT 클러스터링 결과 9개의 의미적 군집이 도출되었다(Silhou
 
 ## 5. 결론
 
-본 연구는 한국 의료 유튜브에서 공포 소구의 조회수 효과를 다단계 인과 추론으로 분석하여, 단순 비교(0.78배)부터 나이 보정(0.56배)까지 일관되게 조회수를 낮추는 방향의 관계를 확인하였고, 채널 규모를 통제한 PSM(0.63배)도 같은 방향이었으나 재실행 시 유의성은 경계선에 머물렀다(§3.4). 다만 채널 고정효과와 DiD 분석에서는 유의한 효과가 발견되지 않아, 이 관계가 채널 간 비교를 벗어나면 불확실해짐을 함께 확인하였다. 특히 의료전문 채널에서는 공포 키워드가 조회수를 유의하게 감소시켜(g=-0.269), 전문성 기반 신뢰를 기대하는 시청자의 반응을 확인하였다.
+본 연구는 한국 의료 유튜브에서 공포 소구의 조회수 효과를 다단계 인과 추론으로 분석하여, 단순 비교(0.78배)부터 나이 보정(0.56배)까지 일관되게 조회수를 낮추는 방향의 관계를 확인하였고, 채널 규모를 통제한 PSM(약 0.65배)도 같은 방향이었으나 구현에 따라 유의성이 달라졌다(§3.4). 다만 채널 고정효과와 DiD 분석에서는 유의한 효과가 발견되지 않아, 이 관계가 채널 간 비교를 벗어나면 불확실해짐을 함께 확인하였다. 특히 의료전문 채널에서는 공포 키워드가 조회수를 유의하게 감소시켜(g=-0.269), 전문성 기반 신뢰를 기대하는 시청자의 반응을 확인하였다.
 
 이러한 결과는 실무적으로 다음과 같은 시사점을 제공한다. 의료전문 채널은 공포 키워드를 지양하고 전문성·신뢰성을 전달하는 정보 제공형 제목 전략이 유리하다. 일반 채널 역시 공포 키워드가 통계적으로 유의한 이득을 주지 않으므로, 콘텐츠 품질과 채널 성장에 집중하는 것이 합리적이다. 공중보건 관점에서 볼 때, 의료 정보의 클릭베이트화는 단기적으로도 효과적이지 않을 뿐만 아니라 전문 채널의 신뢰도를 저하시켜 양질의 의료 정보 전달을 방해할 수 있다.
 
