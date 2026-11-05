@@ -1,5 +1,5 @@
 """
-Re-runs the Medical_Insight_Lab pipeline for paper_draft.md Section 3, for
+Re-runs the Medical_Insight_Lab pipeline's Section 3 analysis, for
 environments where scipy/statsmodels/sklearn cannot load (see
 pure_numpy_stats.py for why this was needed on 2026-09-16). If those
 libraries work for you, just re-run the actual analysis scripts listed

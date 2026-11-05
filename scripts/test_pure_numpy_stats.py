@@ -40,7 +40,7 @@ check("t_sf(1.0, df=30)", P.t_sf_two_sided(1.0, 30), 0.3253, 2e-3)
 p_large = P.t_sf_two_sided(1.96, 100000)
 p_norm = 2 * float(P.norm_sf(1.96))
 check("t_sf(1.96, df=100000) ~ normal", p_large, p_norm, 1e-3)
-# t=0.074 (matches the paper's parallel-trends stat), large df -> should be ~0.94
+# t=0.074 (matches the reported parallel-trends stat), large df -> should be ~0.94
 p_tiny = P.t_sf_two_sided(0.074, 500)
 check("t_sf(0.074, df=500) ~ 0.94", p_tiny, 0.9411, 5e-3)
 

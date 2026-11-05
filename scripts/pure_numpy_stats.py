@@ -1,6 +1,6 @@
 """Pure numpy/pandas fallback for scipy.stats / sklearn primitives.
 
-Written 2026-09-16 to re-run Section 3 of paper_draft.md on a machine where an
+Written 2026-09-16 to re-run the Section 3 analysis on a machine where an
 application-control policy blocks scipy.sparse/scipy.linalg/sklearn's compiled
 DLLs from loading (numpy and pandas load fine; only scipy/statsmodels/sklearn
 are affected). If scipy/statsmodels/sklearn work in your environment, prefer
