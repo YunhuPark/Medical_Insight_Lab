@@ -2,7 +2,7 @@
 의료 유튜브 분석 대시보드
 실행: venv/Scripts/streamlit run dashboard.py
 """
-import os, warnings
+import os, warnings, json
 warnings.filterwarnings("ignore")
 
 import pandas as pd
@@ -43,6 +43,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(BASE, "src/analysis/psm_summary.json"), encoding="utf-8") as summary_file:
+    PSM = json.load(summary_file)
 FEAR_WORDS = ['충격','경악','사망','암','위험','절대','금지','무시','신호','전조',
               '증상','말기','시한부','응급','마비','실명','절단','투석','쇼크',
               '발작','최악','경고','주의','폭발','급증','심각','치명','돌연','급격']
@@ -216,9 +218,9 @@ with tab1:
 with tab2:
     st.markdown("## 🔥 공포 키워드 분석")
 
-    st.markdown("""<div class="warn-box">
+    st.markdown(f"""<div class="warn-box">
     ⚠️ <b>결론 미리보기</b>: 단순 비교에서도 공포 키워드 포함 영상은 0.78배로 낮았고,
-    영상 나이 보정(VPD) 후에는 <b>0.56배로 효과가 더 뚜렷</b>해집니다. 채널 규모를 통제(PSM)해도 <b>0.63배 역효과</b>는 유지됩니다.
+    영상 나이 보정(VPD) 후에는 <b>0.56배로 효과가 더 뚜렷</b>해집니다. 채널 규모를 통제(PSM)해도 <b>{PSM['ratio']:.2f}배 역효과</b>는 유지됩니다.
     </div>""", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
@@ -341,8 +343,9 @@ with tab3:
     naive_p = stats.mannwhitneyu(_f["Views"], _nf["Views"], alternative="two-sided").pvalue
     vpd_p   = stats.mannwhitneyu(_f["VPD"],   _nf["VPD"],   alternative="two-sided").pvalue
 
-    effects = [naive_ratio, vpd_ratio, 0.63, 1.07]
-    pvals   = [naive_p, vpd_p, 0.019, 0.306]
+    effects = [naive_ratio, vpd_ratio, PSM["ratio"], 1.07]
+    pvals   = [naive_p, vpd_p, PSM["p_value"], 0.306]
+    st.caption("PSM은 전체 데이터의 검증된 분석 스냅샷이며 사이드바 필터에 따라 재계산되지 않습니다. 유의성은 구현에 민감합니다.")
     colors  = [C["blue"] if p < 0.05 else C["gray"] for p in pvals]
     colors[2] = C["red"]  # PSM 역효과 강조
 
@@ -929,10 +932,10 @@ with tab6:
         "공포 제목이 조회수를 올린다"는 통념 자체가 이 데이터와 맞지 않음
         </div>""", unsafe_allow_html=True)
     with c2:
-        st.markdown("""<div class="warn-box">
+        st.markdown(f"""<div class="warn-box">
         <h4 style="color:#e94560;margin-top:0">⚠️ 실제 효과 (PSM)</h4>
-        채널 규모 통제 시<br><b>오히려 0.63배 감소</b> (p=0.019)<br><br>
-        Bootstrap CI: [0.44, 0.85]<br>
+        전체 데이터의 채널 규모 통제 시<br><b>조회수 배율 {PSM['ratio']:.2f}배</b> (p={PSM['p_value']:.3f})<br><br>
+        Bootstrap CI: [{PSM['ci_95'][0]:.2f}, {PSM['ci_95'][1]:.2f}]<br>
         공포 키워드 = 조회수 감소 요인
         </div>""", unsafe_allow_html=True)
     with c3:

@@ -1,0 +1,12 @@
+{
+  "scope": "full_dataset",
+  "dataset": "src/4_medical_full_dataset.csv",
+  "analysis_date": "2026-11-02",
+  "reference_date": "2026-04-19",
+  "method": "1:1 nearest-neighbor propensity matching; logit caliper; Wilcoxon; bootstrap",
+  "matched_pairs": 807,
+  "ratio": 0.65,
+  "p_value": 0.036,
+  "ci_95": [0.45, 0.90],
+  "provenance": "Reviewed sklearn rerun reported in README correction of 2026-11-02; implementation-sensitive snapshot, not a filtered estimate."
+}
